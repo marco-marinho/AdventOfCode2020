@@ -20,8 +20,8 @@ public class Day18 {
             sum += Solve(line, false);
             sum2 += Solve(line, true);
         }
-        out.println(sum);
-        out.println(sum2);
+        out.println("Task 01: " + sum);
+        out.println("Task 02: " + sum2);
 
     }
 
