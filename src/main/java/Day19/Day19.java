@@ -1,5 +1,7 @@
 package Day19;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 import static Helpers.Util.readFile;
@@ -83,7 +85,7 @@ public class Day19 {
 
     }
 
-    static HashSet<String> ResolveRule(Rule input, HashMap<Integer, Rule> rules){
+    static @NotNull HashSet<String> ResolveRule(@NotNull Rule input, HashMap<Integer, Rule> rules){
         if (input.acceptable() != null) {
             var output = new HashSet<String>();
             output.add(input.acceptable().toString());
@@ -111,5 +113,3 @@ public class Day19 {
 }
 
 record Rule(Character acceptable, ArrayList<List<Integer>> references){}
-
-
