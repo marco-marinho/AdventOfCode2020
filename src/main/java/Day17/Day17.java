@@ -36,18 +36,18 @@ public class Day17 {
 
     static @NotNull HashSet<IPoint> runCycle(@NotNull HashSet<IPoint> active) {
         var nextActive = new HashSet<IPoint>();
-        var innactNghCnt = new HashMap<IPoint, Integer>();
+        var inctNghCnt = new HashMap<IPoint, Integer>();
 
         for (var point : active) {
             var neighbours = point.getNeighbours();
             var count = 0;
             for (var other : neighbours) {
                 if (active.contains(other)) count++;
-                else innactNghCnt.put(other, innactNghCnt.getOrDefault(other, 0) + 1);
+                else inctNghCnt.put(other, inctNghCnt.getOrDefault(other, 0) + 1);
             }
             if (count == 2 || count == 3) nextActive.add(point);
         }
-        for (var entry : innactNghCnt.entrySet()) {
+        for (var entry : inctNghCnt.entrySet()) {
             if (entry.getValue() == 3) nextActive.add(entry.getKey());
         }
         return nextActive;
