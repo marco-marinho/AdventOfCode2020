@@ -12,6 +12,11 @@ import static java.lang.System.out;
 
 public class Day20 {
 
+    static String monster = """
+                              #\s
+            #    ##    ##    ###
+             #  #  #  #  #  #  \s""";
+
     public static void main(String[] args) {
 
         var data = readFile("Data/Day20.txt");
@@ -38,6 +43,7 @@ public class Day20 {
         }
         tiles.put(number, curMatrix);
 
+
         var borderMap = genBorders(tiles);
         var connections = getConnections(borderMap);
 
@@ -46,35 +52,83 @@ public class Day20 {
         for (var border : borders) {
             prod *= border.getKey();
         }
-        out.println(prod);
+        out.println("Task 01: " + prod);
 
         var jigSaw = getJigSaw(tiles, borderMap, connections);
+        var assembled = assembleJigSaw(tiles, jigSaw);
 
+        out.println("Task 02: " + countNotMonsters(assembled));
+    }
+
+    static @NotNull Integer countNotMonsters(Matrix<Character> assembled){
+        var monsterPattern = new HashSet<Point>();
+        var monsterLines = monster.split("\n");
+        var monsterRows = monsterLines.length;
+        var monsterCols = monsterLines[0].length();
+        for (var i = 0; i < monsterLines.length; i++){
+            var line = monsterLines[i];
+            for (var j = 0; j < line.length(); j++){
+                if (line.charAt(j) == '#') monsterPattern.add(new Point(i, j));
+            }
+        }
+        var found = 0;
+        var state = 0;
+        while (true) {
+            if (state == 1) {
+                assembled = assembled.transpose();
+            }
+            if (state == 2) {
+                assembled = assembled.flip();
+                state = 0;
+            }
+
+            for (var x = 0; x < assembled.nRows - 1 - monsterRows; x++){
+                for (var y = 0; y < assembled.nCols - 1 - monsterCols; y++){
+                    var matched = true;
+                    for (var entry: monsterPattern){
+                        if (assembled.get(x + entry.x(), y + entry.y()) != '#') {
+                            matched = false;
+                            break;
+                        }
+                    }
+                    if (matched) found++;
+                }
+            }
+
+            if (found > 0) {
+                break;
+            }
+
+            state++;
+        }
+        return assembled.countElement('#') - found * monsterPattern.size();
+    }
+
+    static @NotNull Matrix<Character> assembleJigSaw(@NotNull HashMap<Integer, Matrix<Character>> tiles,
+                                                     @NotNull HashMap<Point, Integer> jigSaw) {
         var lengths = (int) Math.round(Math.sqrt(tiles.size()));
         var assembled = new Matrix<>(lengths * 8, lengths * 8, ' ');
-        for (var piece : jigSaw.entrySet()){
+        for (var piece : jigSaw.entrySet()) {
             var location = piece.getKey();
             var tile = tiles.get(piece.getValue());
-            for (var i = 1; i < 9; i++){
+            for (var i = 1; i < 9; i++) {
                 for (var j = 1; j < 9; j++) {
                     assembled.set(location.x() * 8 + i - 1, location.y() * 8 + j - 1, tile.get(i, j));
                 }
             }
         }
-
-        out.println(assembled);
-
+        return assembled;
     }
 
     static @NotNull HashMap<Point, Integer> getJigSaw(@NotNull HashMap<Integer, Matrix<Character>> tiles,
                                                       HashMap<Integer, ArrayList<HashSet<String>>> borderMap,
-                                                      @NotNull HashMap<Integer, ArrayList<Integer>> connections){
+                                                      @NotNull HashMap<Integer, ArrayList<Integer>> connections) {
         var jigSaw = new HashMap<Point, Integer>();
         var lengths = (int) Math.round(Math.sqrt(tiles.size()));
         var borders = connections.entrySet().stream().filter(c -> c.getValue().size() == 2).toList();
 
         var refCorner = borders.iterator().next();
-        jigSaw.put(new Point(0 ,0), refCorner.getKey());
+        jigSaw.put(new Point(0, 0), refCorner.getKey());
         var cornerMat = tiles.get(refCorner.getKey());
         var cornerConnect = connections.get(refCorner.getKey());
 
@@ -83,8 +137,8 @@ public class Day20 {
         var currentId = refCorner.getKey();
 
         var y = 0;
-        while(y < lengths) {
-            if (y!=0) {
+        while (y < lengths) {
+            if (y != 0) {
                 var id = jigSaw.get(new Point(0, y - 1));
                 currentTile = tiles.get(id);
                 var next = findConnection(id, tiles, borderMap, connections, Connection.RIGH_COLUMN);
@@ -109,7 +163,7 @@ public class Day20 {
         return jigSaw;
     }
 
-    static String getSlice(Matrix<Character> tile, @NotNull Connection border){
+    static String getSlice(Matrix<Character> tile, @NotNull Connection border) {
         return switch (border) {
             case TOP_ROW -> tile.topRow();
             case BOTTOM_ROW -> tile.bottomRow();
@@ -127,17 +181,17 @@ public class Day20 {
 
         var possibilities = connections.get(refId);
 
-        for (var possibility : possibilities){
+        for (var possibility : possibilities) {
             var borders = borderMap.get(possibility);
-            for (var border : borders){
-               if (border.contains(reference)) return possibility;
+            for (var border : borders) {
+                if (border.contains(reference)) return possibility;
             }
         }
 
         return -1;
     }
 
-    static Matrix<Character> alignBorder(Matrix<Character> tile, String reference, Connection connection){
+    static Matrix<Character> alignBorder(Matrix<Character> tile, String reference, Connection connection) {
         var state = 0;
         while (true) {
             if (state == 1) {
