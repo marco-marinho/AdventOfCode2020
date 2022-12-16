@@ -12,7 +12,6 @@ import static java.lang.System.out;
 public class Day22 {
 
     public static void main(String[] args){
-
         out.println("Task 01: " + calcScore(playGame(getDecks())));
         var res = playGameRecursive(getDecks());
         var winnerDeck = res.decks().get(res.winner() - 1);
